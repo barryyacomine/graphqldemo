@@ -1,62 +1,34 @@
 const data = {
-  authors: [
+  mspData: [
     {
-      age: "20",
-      name: "auth1",
-      id: "1"
+      name: "msp1",
+      id: "1",
+      partyId: 1
     },
     {
-      age: "30",
-      name: "auth2",
-      id: "2"
+      name: "msp2",
+      id: "2",
+      partyId: 1
     },
     {
-      age: "40",
-      name: "auth3",
-      id: "3"
+      name: "msp3",
+      id: "3",
+      partyId: 2
     },
     {
-      age: "50",
-      name: "auth4",
-      id: "4"
+      name: "msp4",
+      id: "4",
+      partyId: 2
     }
   ],
-  bookData: [
+  partyData: [
     {
-      name: "testbook1",
-      genre: "sci-fi",
-      id: "1",
-      authorId: 1
+      name: "party1",
+      id: 1,
     },
     {
-      name: "testbook2",
-      genre: "sport",
-      id: "2",
-      authorId: 2
-    },
-    {
-      name: "testbook3",
-      genre: "sci-fi",
-      id: "3",
-      authorId: 3
-    },
-    {
-      name: "testbook4",
-      genre: "sport",
-      id: "4",
-      authorId: 3
-    },
-    {
-      name: "testbook5",
-      genre: "history",
-      id: "5",
-      authorId: 2
-    },
-    {
-      name: "testbook6",
-      genre: "sci-fi",
-      id: "6",
-      authorId: 3
+      name: "party2",
+      id: 2,
     }
   ]
 };
