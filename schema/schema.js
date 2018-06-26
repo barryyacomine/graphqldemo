@@ -10,42 +10,76 @@ const {
 const _ = require("lodash");
 const testData = require("./data/testData");
 const typeDefs = require("./typeDefs");
+const httpClient = require("./httpClient");
+const transformer = require("./transformer");
 
 const rootQuery = new GraphQLObjectType({
   name: "rootQueryType",
   fields: {
-    book: {
-      type: typeDefs.bookType,
+    msp: {
+      type: typeDefs.msp,
       args: {
         id: {
           type: GraphQLID
         }
       },
       resolve(parent, args) {
-        return _.find(testData.bookData, { id: args.id });
+        return httpClient.getMSPData().then(
+          resp => {
+            const msps = resp.data.value;
+            const msp = msps.filter(m => m.Id == args.id)[0];
+            return transformer.transformMSPData(msp);
+          },
+          err => {
+            console.log(err);
+          }
+        );
       }
     },
-    author: {
-      type: typeDefs.authorType,
+    party: {
+      type: typeDefs.party,
       args: {
         id: {
           type: GraphQLID
         }
       },
       resolve(parent, args) {
-        return _.find(testData.authors, { id: args.id });
+        return httpClient.getPartyData().then(
+          resp => {
+            const parties = resp.data.value;
+            const party = parties.filter(m => m.Id == args.id)[0];
+            return transformer.transformPartyData(party);
+          },
+          err => {
+            console.log(err);
+          }
+        );
       }
     },
-    books: {
-      type: new GraphQLList(typeDefs.bookType),
+    msps: {
+      type: new GraphQLList(typeDefs.msp),
       resolve(parent, args) {
-        return testData.bookData;
+        return httpClient.getMSPData().then(
+          resp => {
+            const msps = resp.data.value;
+
+            const result = [];
+            let i = 0;
+            for (i = 0; i < msps.length; i++) {
+              result.push(transformer.transformMSPData(msps[i]));
+            }
+            return result;
+          },
+          err => {
+            console.log(err);
+          }
+        );
       }
     },
-    authors: {
-      type: new GraphQLList(typeDefs.authorType),
+    partys: {
+      type: new GraphQLList(typeDefs.party),
       resolve(parent, args) {
-        return testData.authors;
+        return testData.partyData;
       }
     }
   }

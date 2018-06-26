@@ -8,10 +8,12 @@ const {
   GraphQLList
 } = graphQL;
 const _ = require("lodash");
+const httpClient = require("./httpClient");
+const transformer = require("./transformer");
 const testData = require("./data/testData");
 
-const bookType = new GraphQLObjectType({
-  name: "book",
+const mspType = new GraphQLObjectType({
+  name: "msp",
   fields: () => ({
     id: {
       type: GraphQLID
@@ -19,20 +21,48 @@ const bookType = new GraphQLObjectType({
     name: {
       type: GraphQLString
     },
-    genre: {
+    userAlias: {
       type: GraphQLString
     },
-    author: {
-      type: authorType,
+    constituency: {
+      type: constituencyType,
       resolve(parent, args) {
-        return testData.authors.filter(a => a.id == parent.authorId)[0];
+        return httpClient.getConstituencyData().then(
+          resp => {
+            const reqData = resp.data.value;
+            const constituencyData = reqData.filter(r => r.Id == parent.constituencyId)
+            
+            if (constituencyData.length > 0) {
+              return transformer.transformConstituencyData(constituencyData[0]);
+            }
+            return null;
+          },
+          err => {
+            console.log(err);
+          }
+        );
+      }
+    },
+    party: {
+      type: partyType,
+      resolve(parent, args) {
+        return httpClient.getPartyData().then(
+          resp => {
+            const parties = resp.data.value;
+            const party = parties.filter(m => m.Id == parent.partyId)[0];
+            return transformer.transformPartyData(party);
+          },
+          err => {
+            console.log(err);
+          }
+        );
       }
     }
   })
 });
 
-const authorType = new GraphQLObjectType({
-  name: "author",
+const partyType = new GraphQLObjectType({
+  name: "party",
   fields: () => ({
     id: {
       type: GraphQLID
@@ -40,21 +70,46 @@ const authorType = new GraphQLObjectType({
     name: {
       type: GraphQLString
     },
-    age: {
-      type: GraphQLInt
-    },
-    books: {
-      type: new GraphQLList(bookType),
+    members: {
+      type: new GraphQLList(mspType),
       resolve(parent, args) {
-        return testData.bookData.filter(b => b.authorId == parent.id);
+
+        return httpClient.getMSPData().then(
+          (resp) => {
+            let msps = resp.data.value;
+            msps = msps.filter(m => m.PartyId === parent.id)
+            const result = [];
+            let i = 0;
+            for (i = 0; i < msps.length; i++) {
+              result.push(transformer.transformMSPData(msps[i]));
+            }
+            return result;
+          },
+          err => {
+            console.log(err);
+          }
+        );
       }
+    }
+  })
+});
+
+const constituencyType = new GraphQLObjectType({
+  name: "constituency",
+  fields: () => ({
+    id: {
+      type: GraphQLID
+    },
+    name: {
+      type: GraphQLString
     }
   })
 });
 
 const typeDefs = {
-  bookType: bookType,
-  authorType: authorType
+  msp: mspType,
+  party: partyType,
+  constituency: constituencyType
 };
 
 module.exports = typeDefs;
