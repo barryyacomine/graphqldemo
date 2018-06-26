@@ -30,8 +30,9 @@ const mspType = new GraphQLObjectType({
         return httpClient.getConstituencyData().then(
           resp => {
             const reqData = resp.data.value;
-            const constituencyData = reqData.filter(r => r.Id == parent.constituencyId)
-            
+            const constituencyData = reqData.filter(
+              r => r.Id == parent.constituencyId
+            );
             if (constituencyData.length > 0) {
               return transformer.transformConstituencyData(constituencyData[0]);
             }
@@ -73,11 +74,10 @@ const partyType = new GraphQLObjectType({
     members: {
       type: new GraphQLList(mspType),
       resolve(parent, args) {
-
         return httpClient.getMSPData().then(
-          (resp) => {
+          resp => {
             let msps = resp.data.value;
-            msps = msps.filter(m => m.PartyId === parent.id)
+            msps = msps.filter(m => m.PartyId === parent.id);
             const result = [];
             let i = 0;
             for (i = 0; i < msps.length; i++) {
